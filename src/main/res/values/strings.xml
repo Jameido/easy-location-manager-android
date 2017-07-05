@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Easy Location Manager</string>
+    <string name="location_permissions_title">Missing Permissions</string>
+    <string name="location_permissions_rationale">Location permissions are needed to locate you. \n</string>
+</resources>
