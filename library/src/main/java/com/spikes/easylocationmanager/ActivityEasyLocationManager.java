@@ -13,24 +13,19 @@
 package com.spikes.easylocationmanager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
-import android.view.View;
-import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Luca Rossi on 05/07/2017.
@@ -38,33 +33,24 @@ import java.util.List;
 
 public class ActivityEasyLocationManager extends EasyLocationManager {
 
-    public static final int PERMISSION_LOCATION = 100;
-    protected int mPermissionCode = PERMISSION_LOCATION;
-    protected Activity mActivity;
-    private CoordinatorLayout mCoordinatorLayout;
-
-    private OnPermissionResult mOnPermissionResult = new OnPermissionResult() {
-        @Override
-        public void onPermissionsGranted() {
-            requestLocationUpdates();
-        }
-
-        @Override
-        public void onPermissionsDenied(String[] permissions) {
-            checkPermissions();
-        }
-    };
-
+    private static final int PERMISSION_LOCATION = 100;
+    int mPermissionCode = PERMISSION_LOCATION;
+    private Activity mActivity;
 
     public ActivityEasyLocationManager(Activity activity) {
         super(activity);
         mActivity = activity;
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void requestLocationUpdates() {
-        if (checkPermissions()) {
+        if (hasPermissionGranted(mActivity)) {
             super.requestLocationUpdates();
+        } else if (shouldShowRequestPermissionRationale()) {
+            showPermissionsRationaleAlertDialog();
+        } else {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
         }
     }
 
@@ -81,23 +67,11 @@ public class ActivityEasyLocationManager extends EasyLocationManager {
      * Call inside {@link Activity#onRequestPermissionsResult(int, String[], int[])} ()}
      */
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (requestCode != mPermissionCode || null == mOnPermissionResult) {
+        if (requestCode != mPermissionCode) {
             return;
         }
-        List<String> permissionsDenied = new ArrayList<>();
 
-        for (int i = 0; i < permissions.length; i++) {
-            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                permissionsDenied.add(permissions[i]);
-            }
-        }
-
-        if (permissionsDenied.size() > 0) {
-            checkPermissions();
-            mOnPermissionResult.onPermissionsDenied(permissionsDenied.toArray(new String[permissionsDenied.size()]));
-        } else {
-            mOnPermissionResult.onPermissionsGranted();
-        }
+        requestLocationUpdates();
     }
 
     /**
@@ -108,78 +82,44 @@ public class ActivityEasyLocationManager extends EasyLocationManager {
         mActivity = null;
     }
 
-    public void setCoordinatorLayout(CoordinatorLayout coordinatorLayout) {
-        mCoordinatorLayout = coordinatorLayout;
-    }
-
-    public void setOnPermissionResult(OnPermissionResult onPermissionResult) {
-        mOnPermissionResult = onPermissionResult;
-    }
-
-    protected boolean checkPermissions() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            if (!PermissionsCompat.isPermissionGranted(mActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                if (mActivity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    showRationalePermissions();
-                } else {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
-                }
-                return false;
-            }
-        }
-        return true;
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     protected void requestPermissions(String[] permissions) {
         mActivity.requestPermissions(permissions, mPermissionCode);
     }
 
-    /**
-     * If a coordinator layout is avaiable a snackbar is shown otherwise an alertdialog is shown
-     */
-    private void showRationalePermissions() {
-        if (null != mCoordinatorLayout) {
-            showRationalePermissionsSnackbar();
-        } else {
-            showRationalePermissionsAlertDialog();
-        }
+    public boolean shouldShowRequestPermissionRationale() {
+        return ActivityCompat.shouldShowRequestPermissionRationale(mActivity, Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
-    private void showRationalePermissionsSnackbar() {
-        Snackbar snackbarRationale = Snackbar.make(mCoordinatorLayout, R.string.location_permissions_rationale, Snackbar.LENGTH_INDEFINITE);
-        TextView tv = (TextView) snackbarRationale.getView().findViewById(android.support.design.R.id.snackbar_text);
-        tv.setTextColor(Color.WHITE);
-        snackbarRationale.setAction(android.R.string.ok, new View.OnClickListener() {
-            @TargetApi(Build.VERSION_CODES.M)
-            @Override
-            public void onClick(View view) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
-            }
-        });
-        snackbarRationale.setActionTextColor(ContextCompat.getColor(mActivity, android.R.color.white));
-        snackbarRationale.show();
-    }
-
-    private void showRationalePermissionsAlertDialog() {
-
+    private void showPermissionsRationaleAlertDialog() {
         new AlertDialog.Builder(mActivity)
                 .setTitle(R.string.location_permissions_title)
                 .setMessage(R.string.location_permissions_rationale)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @TargetApi(Build.VERSION_CODES.M)
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
-                    }
-                })
-                .create()
+                .setNegativeButton(android.R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.cancel();
+                            }
+                        })
+                .setNeutralButton(
+                        R.string.location_permission_button_settings,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                openAppSettings();
+                            }
+                        }
+                ).create()
                 .show();
     }
 
-    public interface OnPermissionResult {
-        void onPermissionsGranted();
-
-        void onPermissionsDenied(String[] permissions);
+    private void openAppSettings() {
+        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + mActivity.getPackageName()));
+        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mActivity.startActivity(myAppSettings);
     }
 }

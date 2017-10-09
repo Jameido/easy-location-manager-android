@@ -12,11 +12,15 @@
 
 package com.spikes.easylocationmanager;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 
 /**
  * Created by Luca Rossi on 05/07/2017.
@@ -101,7 +105,7 @@ public class EasyLocationManager implements LocationListener {
         return mLastKnownLocation;
     }
 
-    protected void initLastKnownLocation(){
+    protected void initLastKnownLocation() {
         if (mLocationManager != null && mLastKnownLocation == null) {
             if (mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER)) {
                 mLastKnownLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -116,7 +120,7 @@ public class EasyLocationManager implements LocationListener {
     /**
      * Determines whether one Location reading is better than the current Location fix
      *
-     * @param newLocation            The new Location that you want to evaluate
+     * @param newLocation         The new Location that you want to evaluate
      * @param currentBestLocation The current Location fix, to which you want to compare the new one
      */
     private boolean isBetterLocation(Location newLocation, Location currentBestLocation) {
@@ -173,5 +177,12 @@ public class EasyLocationManager implements LocationListener {
 
     public interface OnLocationChangedListener {
         void onLocationChanged(Location location);
+    }
+
+    protected boolean hasPermissionGranted(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        return PermissionsCompat.isPermissionGranted(context, Manifest.permission.ACCESS_FINE_LOCATION);
     }
 }

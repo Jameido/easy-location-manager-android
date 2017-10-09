@@ -12,8 +12,7 @@
 
 package com.spikes.easylocationmanager;
 
-import android.app.Activity;
-import android.content.Context;
+import android.Manifest;
 import android.support.v4.app.Fragment;
 
 /**
@@ -35,5 +34,10 @@ public class FragmentEasyLocationManager extends ActivityEasyLocationManager {
     @Override
     protected void requestPermissions(String[] permissions) {
         mFragment.requestPermissions(permissions, mPermissionCode);
+    }
+
+
+    public boolean shouldShowRequestPermissionRationale() {
+        return mFragment.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
     }
 }

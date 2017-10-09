@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), EasyLocationManager.OnLocationChangedL
 
         mEasyLocationManager = ActivityEasyLocationManager(this)
         mEasyLocationManager.setOnLocationChangedListener(this)
-        mEasyLocationManager.setCoordinatorLayout(findViewById(R.id.coordinator))
+        mEasyLocationManager.requestLocationUpdates()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
