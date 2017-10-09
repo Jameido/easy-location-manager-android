@@ -12,13 +12,36 @@
 
 package com.spikes.easylocationmanager.demo
 
+import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.spikes.easylocationmanager.ActivityEasyLocationManager
+import com.spikes.easylocationmanager.EasyLocationManager
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), EasyLocationManager.OnLocationChangedListener {
+
+    lateinit var mEasyLocationManager : ActivityEasyLocationManager
+
+    override fun onLocationChanged(location: Location?) {
+        TODO("use new location")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        mEasyLocationManager = ActivityEasyLocationManager(this)
+        mEasyLocationManager.setOnLocationChangedListener(this)
+        mEasyLocationManager.setCoordinatorLayout(findViewById(R.id.coordinator))
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        mEasyLocationManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onDestroy() {
+        mEasyLocationManager.onDestroy()
+        super.onDestroy()
     }
 }
