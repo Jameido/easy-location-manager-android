@@ -1,4 +1,4 @@
-package com.spikes.easylocationmanager.demo
+package pro.eluzivespikes.easylocationmanager.demo
 
 import org.junit.Test
 

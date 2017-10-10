@@ -6,7 +6,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     defaultConfig {
-        applicationId "com.spikes.easylocationmanager.demo"
+        applicationId "pro.eluzivespikes.easylocationmanager.demo"
         minSdkVersion 17
         targetSdkVersion 26
         versionCode 1
