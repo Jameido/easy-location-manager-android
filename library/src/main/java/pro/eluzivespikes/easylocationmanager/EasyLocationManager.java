@@ -15,6 +15,7 @@
 package pro.eluzivespikes.easylocationmanager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -82,7 +83,7 @@ public class EasyLocationManager implements LocationListener {
         mOnLocationChangedListener = listener;
     }
 
-    @SuppressWarnings({"MissingPermission"})
+    @SuppressLint("MissingPermission")
     public void requestLocationUpdates() {
         if (mLocationManager != null) {
             if (mLocationManager.getProviders(true).contains(LocationManager.NETWORK_PROVIDER)) {
@@ -93,18 +94,19 @@ public class EasyLocationManager implements LocationListener {
         }
     }
 
-    @SuppressWarnings({"MissingPermission"})
+    @SuppressLint("MissingPermission")
     public void removeLocationUpdates() {
         if (mLocationManager != null)
             mLocationManager.removeUpdates(this);
     }
 
-    @SuppressWarnings({"MissingPermission"})
+    @SuppressLint("MissingPermission")
     public Location getLastKnownLocation() {
         initLastKnownLocation();
         return mLastKnownLocation;
     }
 
+    @SuppressLint("MissingPermission")
     protected void initLastKnownLocation() {
         if (mLocationManager != null && mLastKnownLocation == null) {
             if (mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER)) {
